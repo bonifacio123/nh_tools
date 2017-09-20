@@ -1,0 +1,27 @@
+Algo,"Intel(R) Core(TM) i5-4690K CPU @ 3.50GHz
+CPU#1","MSI GeForce GTX 1080
+GPU#1","MSI GeForce GTX 1070
+GPU#2"
+Claymore_DaggerDecred,0,24058346.666667,27233710
+Claymore_DaggerHashimoto,0,24549426,28222920
+Claymore_DaggerLbry,0,24079906.666667,27160280
+Claymore_DaggerPascal,0,24290084,27648544
+Claymore_DaggerSia,0,24271047.5,27707736
+EWBF_Equihash,0,515.31666666667,431.2
+XmrStackCPU_CryptoNight,161.9,0,0
+ccminer_Blake2s,0,4306230000,3542200000
+ccminer_CryptoNight,0,607,637
+ccminer_Decred,0,3126620000,2468110000
+ccminer_Keccak,0,842140000,664940000
+ccminer_Lbry,0,339480000,270010000
+ccminer_Lyra2REv2,0,44230000,34430000
+ccminer_NeoScrypt,0,1050650,910740
+ccminer_Nist5,0,0,0
+ccminer_Sia,0,2003650000,1607057333.3333
+ccminer_Skunk,0,35070000,28000000
+ccminer_X11Gost,0,8192340,6474220
+ccminer_alexis_Nist5,0,0,0
+ccminer_alexis_X11Gost,0,0,0
+ethminer_DaggerHashimoto,0,24536678,27745320
+excavator_Equihash,0,477.532584,406.420321
+excavator_Pascal,0,1201405000,947644538
