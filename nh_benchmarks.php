@@ -1,38 +1,41 @@
 <?php
 /*
  *   Nicehash Benchmark Export Benchmarks To CSV
- *
- *   Written using PHP 7.1.3
- *   Haven't testing under php 5.x but should work
- *
- *   To use: 1) Modify vars under "User Defined" section below
- *           2) Execute: php nh_benchmarks.php
- *           3) Open in excel benchmarks.csv
  */
 
-# User Defined
-$pathToConfigs = 'E:\\coin\\NHML-1.8.1.3\\configs\\';
-$pathToCsv     = 'E:\\nh\\';
-$defaultCsv    = 'benchmarks.csv';
-$csvSeperator  = ',';
+# Load settings
+clearstatcache();
+
+if (!file_exists('settings_benchmarks.json')) {
+    echo "\nNH_BENCHMARK: settings_benchmarks.json - file does not exist in same location as PHP script\n\n";
+    exit;    
+}
+
+$json     = file_get_contents('settings_benchmarks.json');
+$settings = json_decode($json, TRUE);
+
+if (NULL == $settings) {
+    echo "\nNH_BENCHMARK: Invalid or corrupt settings_benchmarks.json file\n\n";
+    exit;    
+}
 
 # Check that paths and files exist
-$useThisCsv = isset($argv[1]) ? $argv[1] : $defaultCsv;
+$useThisCsv = isset($argv[1]) ? $argv[1] : $settings['defaultCsvFileName'];
 
-if (!is_dir($pathToConfigs)) {
-    echo "\nNH_BENCHMARK: {$pathToConfigs} - directory does not exist\n\n";
+if (!is_dir($settings['pathToNicehashConfigsDir'])) {
+    echo "\nNH_BENCHMARK: {$settings['pathToNicehashConfigsDir']} - directory does not exist\n\n";
     exit;
 }
 
-if (!is_dir($pathToCsv)) {
-    echo "\nNH_BENCHMARK: {$pathToCsv} - directory does not exist\n\n";
+if (!is_dir($settings['pathToCsvSaveDir'])) {
+    echo "\nNH_BENCHMARK: {$settings['pathToCsvSaveDir']} - directory does not exist\n\n";
     exit;
 }
 
-$files = glob("{$pathToConfigs}benchmark_*");
+$files = glob("{$settings['pathToNicehashConfigsDir']}benchmark_*");
 
 if (count($files) < 1) {
-    echo "\nNH_BENCHMARK: no benchmark files found in {$pathToConfigs}\n\n";
+    echo "\nNH_BENCHMARK: no benchmark files found in {$settings['pathToNicehashConfigsDir']}\n\n";
     exit;
 }
 
@@ -60,7 +63,7 @@ foreach ($files as $fn) {
 ksort($algo);
 
 # Open CSV file for writing
-$fp = fopen($pathToCsv . $useThisCsv, 'w');
+$fp = fopen($settings['pathToCsvSaveDir'] . $useThisCsv, 'w');
 
 # Write CSV header
 $line = array('Algo');
@@ -79,7 +82,7 @@ foreach ($card as $uuid => $name) {
     $line[] = "{$name}\n{$shortName}";
 }
 
-fputcsv($fp, $line, $csvSeperator);
+fputcsv($fp, $line, $settings['csvSeperator']);
 
 # Write CSV algo detail
 foreach ($algo as $algoName => $nul) {
@@ -90,7 +93,9 @@ foreach ($algo as $algoName => $nul) {
         $line[] = $speed;
     }
 
-    fputcsv($fp, $line, $csvSeperator);
+    fputcsv($fp, $line, $settings['csvSeperator']);
 }
 
 fclose($fp);
+
+echo "\nnh_benchmarks: CSV file created\n\n";

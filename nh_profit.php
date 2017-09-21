@@ -11,30 +11,42 @@
  *           3) Open in your browser "index.html"
  */
 
-# User Defined
-$pathToLogs = 'E:\\coin\\NHML-1.8.1.3\\logs\\';
-$pathToHtml = 'E:\\nh\\';
-$defaultLog = 'log.txt';
+# Load settings
+clearstatcache();
 
-if (!is_dir($pathToLogs)) {
-    echo "\nNH_PROFIT: {$pathToLogs} - directory does not exist\n\n";
+if (!file_exists('settings_profit.json')) {
+    echo "\nNH_BENCHMARK: settings_profit.json - file does not exist in same location as PHP script\n\n";
+    exit;    
+}
+
+$json     = file_get_contents('settings_profit.json');
+$settings = json_decode($json, TRUE);
+
+if (NULL == $settings) {
+    echo "\nNH_BENCHMARK: Invalid or corrupt settings_profit.json file\n\n";
+    exit;    
+}
+
+# Check that paths and files exist
+if (!is_dir($settings['pathToNicehashLogsDir'])) {
+    echo "\nNH_PROFIT: {$settings['pathToNicehashLogsDir']} - directory does not exist\n\n";
     exit;
 }
 
-$useThisLog = isset($argv[1]) ? $argv[1] : $defaultLog;
+$useThisLog = isset($argv[1]) ? $argv[1] : $settings['defaultNicehashLogFile'];
 
-if (!file_exists($pathToLogs . $useThisLog)) {
-    echo "\nNH_PROFIT: {$pathToLogs}{$useThisLog} - file does not exist\n\n";
+if (!file_exists($settings['pathToNicehashLogsDir'] . $useThisLog)) {
+    echo "\nNH_PROFIT: {$settings['pathToNicehashLogsDir']}{$useThisLog} - file does not exist\n\n";
     exit;
 }
 
-if (!is_dir($pathToHtml)) {
-    echo "\nNH_PROFIT: {$pathToHtml} - direcotry does not exist\n\n";
+if (!is_dir($settings['pathToHtmlDir'])) {
+    echo "\nNH_PROFIT: {$settings['pathToHtmlDir']} - direcotry does not exist\n\n";
     exit;
 }
 
 # System defined
-$handle     = fopen($pathToLogs . $useThisLog, 'r');
+$handle     = fopen($settings['pathToNicehashLogsDir'] . $useThisLog, 'r');
 $btc        = 0;
 $profit2    = array();
 $allAlgos   = array();
@@ -97,10 +109,10 @@ if ($handle) {
 
     # Now build HTML files
 
-    file_put_contents($pathToHtml . 'index.html',"<p><h2>Nicehash Algo Profitability</h2><p>");
+    file_put_contents($settings['pathToHtmlDir'] . 'index.html',"<p><h2>Nicehash Algo Profitability</h2><p>");
 
     foreach ($profit2 as $dev => $devProp) {
-        file_put_contents($pathToHtml . 'index.html',"<a href=\"{$dev}.html\">{$dev}</a><br>", FILE_APPEND);
+        file_put_contents($settings['pathToHtmlDir'] . 'index.html',"<a href=\"{$dev}.html\">{$dev}</a><br>", FILE_APPEND);
 
         $html = "<!DOCTYPE html>
 <script src=\"https://code.jquery.com/jquery-3.1.1.min.js\"></script>
@@ -190,6 +202,8 @@ seriesOptions[{$ct}] = {
 </script>
 ";
 
-        file_put_contents("{$pathToHtml}{$dev}.html", $html); # write device stats
+        file_put_contents("{$settings['pathToHtmlDir']}{$dev}.html", $html); # write device stats
     }
 }
+
+echo "\nnh_profit: HTML files created\n\n";
