@@ -27,6 +27,8 @@ To generate the profit HTML files using a log file other than the default one sp
 php nh_profit.php log.1.txt
 `
 
+Then using a web browser open the index.html file saved in the location specified in your settings_profit.json file.
+
 ## Usage: nh_benchmarks
 
 To create the benchmarks CSV file:
@@ -40,6 +42,8 @@ Or to create the benchmarks CSV with a different file name other than the defaul
 `
 php nh_benchmarks.php algo_stats.csv
 `
+
+Then, Microsoft Excel or Open Office Calc, open the CSV file saved in the location specified in your settings_profit.json file.
 
 ## Sample Output
 
