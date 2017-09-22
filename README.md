@@ -2,7 +2,12 @@
 
 Some tools to process Nicehash logs
 
-##Requirements
+```
+2017-09-22 version 1.1.0:  Add graph for global profit
+2017-09-22 version 1.0.0:  Initial Release
+```
+
+## Requirements
 Although written using PHP 7.1.3 on Windows 10 it should work with PHP 5.x or Linux.
 
 ## Included Tools
@@ -54,7 +59,11 @@ Then, Microsoft Excel or Open Office Calc, open the CSV file saved in the locati
 
 #### Profits Main Menu
 
-[![nh_profit_menu_screen.png](https://s26.postimg.org/y1f1myahl/nh_profit_menu_screen.png)](https://postimg.org/image/go4r83f6d/)
+[![nh_profit_menu_screen.png](https://s26.postimg.org/j5sjw48ih/nh_profit_menu_screen.png)](https://postimg.org/image/uuwjk2zh1/)
+
+#### Global Profits
+
+[![nh_global_profits.png](https://s26.postimg.org/ivl1crtw9/nh_global_profits.png)](https://postimg.org/image/6tpnimknp/)
 
 #### Profits Detail
 

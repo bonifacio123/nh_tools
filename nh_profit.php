@@ -46,14 +46,25 @@ if (!is_dir($settings['pathToHtmlDir'])) {
 }
 
 # System defined
-$handle     = fopen($settings['pathToNicehashLogsDir'] . $useThisLog, 'r');
-$btc        = 0;
-$profit2    = array();
-$allAlgos   = array();
+$handle       = fopen($settings['pathToNicehashLogsDir'] . $useThisLog, 'r');
+$btc          = 0;
+$profit2      = array();
+$allAlgos     = array();
+$globalProfit = array();
 
 if ($handle) {
     while (($buff = fgets($handle, 4096)) !== FALSE) {
         $buffr = trim(iconv("UCS-2", "ISO-8859-1", $buff));
+
+        # Grab global profitability details if available
+        if (FALSE !== strpos($buffr, 'Current Global profit:') &&
+            FALSE === strpos($buffr, 'IS PROFITABLE') &&
+            preg_match('/Current Global profit: ([.0-9]*) /', $buffr, $matches)) {
+                $microsec = strtotime($datetime) * 1000;
+                if ($microsec > 1234) {
+                    $globalProfit[] = "[{$microsec},{$matches[1]}]";
+                }
+        }
 
         # Capture current bitcoin rate
         if (preg_match('/Current Bitcoin rate: (.*)/', $buffr, $matches)) {
@@ -67,8 +78,8 @@ if ($handle) {
             }
 
             # Get name of device (GPU, CPU, etc)
-            if (preg_match('/Profits for.*\((.*)\)/', $buffr, $matches)) {
-                $device = str_replace(array(' ','#'), '_', $matches[1]);
+            if (preg_match('/Profits for (.*) \((.*)\)/', $buffr, $matches)) {
+                $device = $matches[1] . '|' . str_replace(array(' ','#'), '_', $matches[2]);
                 $profit = array();
             }
 
@@ -81,7 +92,6 @@ if ($handle) {
 
             # 
             if (preg_match('/MOST PROFITABLE ALGO: (.*), PROFIT: (.*)$/', $buffr, $matches)) {
-
                 # Only show first 100,000 entries
                 if ($ct[$device] < 100000) {
                     if (!isset($allAlgos[$device])) {
@@ -107,12 +117,21 @@ if ($handle) {
         exit;
     }
 
-    # Now build HTML files
+    # Create INDEX.HTML menu
+    $fileName = $settings['pathToHtmlDir'] . 'index.html';
 
-    file_put_contents($settings['pathToHtmlDir'] . 'index.html',"<p><h2>Nicehash Algo Profitability</h2><p>");
+    file_put_contents($fileName, "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">
+<html xmlns=\"http://www.w3.org/1999/xhtml\">
+<p><h2>Nicehash Tools - Profits - v1.1.0 - <a href=\"https://github.com/bonifacio123/nh_tools\" target=\"_blank\">GitHub</a></h2><p>
+<a href=\"global_profits.html\" title=\" For all devices \">Global Profits</a>
+<br><br><h3>Algo Profits</h3>
+");
 
+    # Build HTML content
     foreach ($profit2 as $dev => $devProp) {
-        file_put_contents($settings['pathToHtmlDir'] . 'index.html',"<a href=\"{$dev}.html\">{$dev}</a><br>", FILE_APPEND);
+        list($deviceID, $deviceName) = explode('|', $dev);
+
+        file_put_contents($fileName, "<a href=\"{$deviceName}.html\" title=\" {$deviceID} \">{$deviceName}</a> - {$deviceID}<br>\n", FILE_APPEND);
 
         $html = "<!DOCTYPE html>
 <script src=\"https://code.jquery.com/jquery-3.1.1.min.js\"></script>
@@ -173,7 +192,7 @@ function createChart() {
         },
 
         title: {
-            text: 'Nicehash Algo Profitability'
+            text: 'Nicehash Algo Profitability<br>{$deviceName}<br>{$deviceID}'
         },
 
         tooltip: {
@@ -202,8 +221,89 @@ seriesOptions[{$ct}] = {
 </script>
 ";
 
-        file_put_contents("{$settings['pathToHtmlDir']}{$dev}.html", $html); # write device stats
+        file_put_contents("{$settings['pathToHtmlDir']}{$deviceName}.html", $html); # write device stats
     }
 }
+
+# Create Global Profits detail
+
+$html = "<!DOCTYPE html>
+<script src=\"https://code.jquery.com/jquery-3.1.1.min.js\"></script>
+<script src=\"https://code.highcharts.com/stock/highstock.js\"></script>
+<script src=\"https://code.highcharts.com/stock/modules/exporting.js\"></script>
+
+<div id=\"container\" style=\"height: 400px; min-width: 310px\"></div>
+<script language='javascript'>
+function chart (seriesData) {
+    // Create the chart
+    Highcharts.stockChart('container', {
+        rangeSelector: {
+            buttons: [{
+                count: 1,
+                type: 'hour',
+                text: '1H'
+            }, {
+                count: 2,
+                type: 'hour',
+                text: '2H'
+            }, {
+                count: 4,
+                type: 'hour',
+                text: '4H'
+            }, {
+                count: 8,
+                type: 'hour',
+                text: '8H'
+            }, {
+                count: 12,
+                type: 'hour',
+                text: '12H'
+            }, {
+                count: 1,
+                type: 'day',
+                text: '1D'
+            }, {
+                count: 1,
+                type: 'week',
+                text: '1W'
+            }, {
+                type: 'all',
+                text: 'All'
+            }],
+            inputEnabled: false,
+            selected: 0
+        },
+
+        title: {
+            text: 'Nicehash Global Profit'
+        },
+
+        yAxis: {
+            title: {
+                text: 'USD'
+            }
+        },
+
+        series: [{
+            name: 'USD',
+            data: seriesData,
+            tooltip: {
+                valueDecimals: 2
+            }
+        }]
+    });
+}
+
+var data = [
+" . implode(",\n", $globalProfit) . "
+];
+
+chart(data);
+</script>
+";
+
+file_put_contents("{$settings['pathToHtmlDir']}global_profits.html", $html);
+
+# Finished
 
 echo "\nnh_profit: HTML files created\n\n";
