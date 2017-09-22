@@ -48,7 +48,7 @@ Or to create the benchmarks CSV with a different file name other than the defaul
 php nh_benchmarks.php algo_stats.csv
 `
 
-Then, Microsoft Excel or Open Office Calc, open the CSV file saved in the location specified in your settings_profit.json file.
+Then, using Microsoft Excel or Open Office Calc, open the CSV file saved in the location specified in your settings_profit.json file.
 
 ## Sample Output
 
